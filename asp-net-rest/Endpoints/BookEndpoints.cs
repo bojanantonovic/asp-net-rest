@@ -2,7 +2,7 @@ using AspNetRest.Contracts;
 using AspNetRest.Services;
 using AspNetRest.Validation;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+using static AspNetRest.Endpoints.EndpointResults;
 
 namespace AspNetRest.Endpoints;
 
@@ -56,15 +56,11 @@ public static class BookEndpoints
     private static Ok<BookPageResponse> GetPage([AsParameters] BookPageQuery query, IBookService books) =>
         TypedResults.Ok(books.GetPage(query));
 
-    private static Results<Ok<BookResponse>, NotFound> GetById(int id, IBookService books)
-    {
-        var book = books.Get(id);
-
-        return book is null ? TypedResults.NotFound() : TypedResults.Ok(book);
-    }
+    private static Results<Ok<BookResponse>, NotFound> GetById(int id, IBookService books) =>
+        OkOrNotFound(books.Get(id));
 
     private static Results<Ok, NotFound> HeadById(int id, IBookService books) =>
-        books.Exists(id) ? TypedResults.Ok() : TypedResults.NotFound();
+        OkOrNotFound(books.Exists(id));
 
     private static Created<BookResponse> Create(CreateBookRequest request, IBookService books)
     {
@@ -76,25 +72,17 @@ public static class BookEndpoints
     private static Results<Ok<BookResponse>, NotFound> Replace(
         int id,
         UpdateBookRequest request,
-        IBookService books)
-    {
-        var replaced = books.Replace(id, request);
-
-        return replaced is null ? TypedResults.NotFound() : TypedResults.Ok(replaced);
-    }
+        IBookService books) =>
+        OkOrNotFound(books.Replace(id, request));
 
     private static Results<Ok<BookResponse>, NotFound> Patch(
         int id,
         PatchBookRequest request,
-        IBookService books)
-    {
-        var patched = books.Patch(id, request);
-
-        return patched is null ? TypedResults.NotFound() : TypedResults.Ok(patched);
-    }
+        IBookService books) =>
+        OkOrNotFound(books.Patch(id, request));
 
     private static Results<NoContent, NotFound> Delete(int id, IBookService books) =>
-        books.Delete(id) ? TypedResults.NoContent() : TypedResults.NotFound();
+        NoContentOrNotFound(books.Delete(id));
 
     private static NoContent GetOptions(HttpResponse response)
     {

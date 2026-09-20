@@ -1,4 +1,5 @@
 using AspNetRest.Contracts;
+using AspNetRest.Domain;
 using AspNetRest.Options;
 using AspNetRest.Persistence;
 using Microsoft.Extensions.Options;
@@ -47,7 +48,7 @@ public sealed class BookService(
         var book = repository.GetById(id);
         auditTrail.Record(string.Format(ReadStep, id, Describe(book is not null)));
 
-        return book is null ? null : mapper.ToResponse(book);
+        return MapOrNull(book);
     }
 
     public bool Exists(int id) => repository.GetById(id) is not null;
@@ -65,7 +66,7 @@ public sealed class BookService(
         var replaced = repository.Replace(id, Normalize(request.Title), Normalize(request.Author), request.Year);
         auditTrail.Record(string.Format(ReplacedStep, id, Describe(replaced is not null)));
 
-        return replaced is null ? null : mapper.ToResponse(replaced);
+        return MapOrNull(replaced);
     }
 
     public BookResponse? Patch(int id, PatchBookRequest request)
@@ -73,7 +74,7 @@ public sealed class BookService(
         var patched = repository.Patch(id, request.Title?.Trim(), request.Author?.Trim(), request.Year);
         auditTrail.Record(string.Format(PatchedStep, id, Describe(patched is not null)));
 
-        return patched is null ? null : mapper.ToResponse(patched);
+        return MapOrNull(patched);
     }
 
     public bool Delete(int id)
@@ -83,6 +84,8 @@ public sealed class BookService(
 
         return deleted;
     }
+
+    private BookResponse? MapOrNull(Book? book) => book is null ? null : mapper.ToResponse(book);
 
     private static string Describe(bool value) => value ? Yes : No;
 
