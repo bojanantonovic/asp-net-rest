@@ -1,35 +1,35 @@
-### Alle Requests dieser Schulung – in Rider/VS Code mit dem grünen Pfeil links ausführbar.
+### Every request of this training example - run them one by one with the green arrow in Rider/VS Code.
 @host = http://localhost:5080
 
-### ----- Übersicht -----
+### ----- Overview -----
 GET {{host}}/
 
-### Das generierte OpenAPI-Dokument (nur in der Entwicklung)
+### The generated OpenAPI document (development only)
 GET {{host}}/openapi/v1.json
 
-### ----- CRUD auf /api/books -----
-### READ (Liste): Standard-Sortierung nach Id
+### ----- CRUD on /api/books -----
+### READ (list): default order by id
 GET {{host}}/api/books
 
-### READ (Liste): sortiert nach Titel – wählt den keyed service "title"
+### READ (list): sorted by title - picks the keyed service "title"
 GET {{host}}/api/books?sortBy=title
 
-### READ (Liste): sortiert nach Jahr, zwei Einträge pro Seite
+### READ (list): sorted by year, two entries per page
 GET {{host}}/api/books?sortBy=year&page=1&pageSize=2
 
-### READ (Liste): ungültige Query-Parameter -> 400 vom Validierungs-Filter
-GET {{host}}/api/books?sortBy=verlag&page=0&pageSize=9999
+### READ (list): invalid query parameters -> 400 from the validation filter
+GET {{host}}/api/books?sortBy=publisher&page=0&pageSize=9999
 
-### READ (einzeln)
+### READ (single)
 GET {{host}}/api/books/1
 
-### READ: unbekannte Id -> 404
+### READ: unknown id -> 404
 GET {{host}}/api/books/999
 
-### HEAD: prüft nur die Existenz, ohne Body
+### HEAD: only checks existence, without a body
 HEAD {{host}}/api/books/1
 
-### CREATE -> 201 mit Location-Header
+### CREATE -> 201 with a Location header
 POST {{host}}/api/books
 Content-Type: application/json
 
@@ -39,7 +39,7 @@ Content-Type: application/json
   "year": 1950
 }
 
-### CREATE: Dublette -> 400 (fachliche Regel mit Datenbank-Zugriff)
+### CREATE: duplicate -> 400 (domain rule with store access)
 POST {{host}}/api/books
 Content-Type: application/json
 
@@ -49,7 +49,7 @@ Content-Type: application/json
   "year": 1950
 }
 
-### CREATE: ungültige Daten -> 400 mit Problem Details
+### CREATE: invalid data -> 400 with problem details
 POST {{host}}/api/books
 Content-Type: application/json
 
@@ -59,7 +59,7 @@ Content-Type: application/json
   "year": 1000
 }
 
-### UPDATE (vollständig)
+### UPDATE (complete)
 PUT {{host}}/api/books/4
 Content-Type: application/json
 
@@ -69,7 +69,7 @@ Content-Type: application/json
   "year": 1951
 }
 
-### UPDATE (nur ein Feld)
+### UPDATE (single field)
 PATCH {{host}}/api/books/4
 Content-Type: application/json
 
@@ -77,7 +77,7 @@ Content-Type: application/json
   "year": 1952
 }
 
-### PATCH ohne Änderung -> 400
+### PATCH without a change -> 400
 PATCH {{host}}/api/books/4
 Content-Type: application/json
 
@@ -86,18 +86,18 @@ Content-Type: application/json
 ### DELETE -> 204
 DELETE {{host}}/api/books/4
 
-### DELETE derselben Id nochmals -> 404
+### DELETE the same id again -> 404
 DELETE {{host}}/api/books/4
 
-### OPTIONS: erlaubte Methoden im Allow-Header
+### OPTIONS: allowed methods in the Allow header
 OPTIONS {{host}}/api/books
 
-### ----- Diagnose: Dependency Injection zum Anfassen -----
-### Lebensdauern vergleichen – zweimal aufrufen und die Ids vergleichen!
+### ----- Diagnostics: dependency injection you can touch -----
+### Compare the lifetimes - call it twice and compare the ids!
 GET {{host}}/api/diagnostics/lifetimes
 
-### Das Protokoll des laufenden Requests (Scoped-Service über Middleware und Endpunkt hinweg)
+### The audit trail of the running request (scoped service across middleware and endpoint)
 GET {{host}}/api/diagnostics/audit
 
-### Absichtlicher Fehler -> 500 als Problem Details
+### Deliberate failure -> 500 as problem details
 GET {{host}}/api/diagnostics/boom

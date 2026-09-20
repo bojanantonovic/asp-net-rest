@@ -4,20 +4,20 @@ namespace AspNetRest.Services.Diagnostics;
 
 public sealed class LifetimeInspector(IServiceProvider scopeServices, IServiceScopeFactory scopeFactory)
 {
-    private const string RequestScopeName = "Request-Scope (von ASP.NET pro Request geöffnet)";
-    private const string ChildScopeName = "Eigener Scope (mit IServiceScopeFactory erzeugt)";
+    private const string RequestScopeName = "Request scope (opened by ASP.NET for every request)";
+    private const string ChildScopeName = "Own scope (created with IServiceScopeFactory)";
 
     private const string SingletonConclusion =
-        "Singleton: in beiden Scopes dieselbe Id – eine Instanz für die gesamte Laufzeit.";
+        "Singleton: the same id in both scopes - one instance for the whole application lifetime.";
 
     private const string ScopedConclusion =
-        "Scoped: innerhalb eines Scopes dieselbe Id, im zweiten Scope eine andere.";
+        "Scoped: the same id within one scope, a different one in the second scope.";
 
     private const string TransientConclusion =
-        "Transient: schon zwei Auflösungen im selben Scope liefern verschiedene Ids.";
+        "Transient: even two resolutions within the same scope return different ids.";
 
     private const string DisposeConclusion =
-        "Beim Verlassen des Scopes (using) gibt der Container alle IDisposable-Services dieses Scopes frei.";
+        "When the scope is disposed, the container releases every IDisposable service of that scope.";
 
     public LifetimeReport Inspect()
     {

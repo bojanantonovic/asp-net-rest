@@ -9,19 +9,19 @@ public static class DiagnosticsEndpoints
 {
     public static IEndpointRouteBuilder MapDiagnosticsEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var diagnostics = endpoints.MapGroup("/api/diagnostics").WithTags("Diagnose");
+        var diagnostics = endpoints.MapGroup("/api/diagnostics").WithTags("Diagnostics");
 
         diagnostics.MapGet("/lifetimes", GetLifetimes)
             .WithName(nameof(GetLifetimes))
-            .WithSummary("Die drei Lebensdauern in zwei Scopes vergleichen");
+            .WithSummary("Compare the three lifetimes across two scopes");
 
         diagnostics.MapGet("/audit", GetAuditTrail)
             .WithName(nameof(GetAuditTrail))
-            .WithSummary("Das Protokoll des aktuellen Requests lesen");
+            .WithSummary("Read the audit trail of the current request");
 
         diagnostics.MapGet("/boom", Boom)
             .WithName(nameof(Boom))
-            .WithSummary("Eine unbehandelte Ausnahme auslösen (ergibt 500)");
+            .WithSummary("Throw an unhandled exception (results in 500)");
 
         return endpoints;
     }
@@ -33,5 +33,5 @@ public static class DiagnosticsEndpoints
         TypedResults.Ok(auditTrail.Entries);
 
     private static IResult Boom() =>
-        throw new InvalidOperationException("Absichtlich ausgelöst, um die Fehlerbehandlung zu zeigen.");
+        throw new InvalidOperationException("Thrown on purpose to demonstrate the error handling.");
 }

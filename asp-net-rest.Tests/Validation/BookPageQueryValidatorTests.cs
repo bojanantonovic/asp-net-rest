@@ -8,7 +8,7 @@ namespace AspNetRest.Tests.Validation;
 
 public sealed class BookPageQueryValidatorTests
 {
-    private const string UnknownSortKey = "verlag";
+    private const string UnknownSortKey = "publisher";
     private const int PageSizeAboveLimit = 9999;
     private const int InvalidPage = 0;
 

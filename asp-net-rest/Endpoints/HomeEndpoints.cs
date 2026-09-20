@@ -11,8 +11,8 @@ public static class HomeEndpoints
     {
         endpoints.MapGet("/", GetOverview)
             .WithName(nameof(GetOverview))
-            .WithSummary("Übersicht über die verfügbaren Endpunkte")
-            .WithTags("Start");
+            .WithSummary("Overview of the available endpoints")
+            .WithTags("Home");
 
         return endpoints;
     }

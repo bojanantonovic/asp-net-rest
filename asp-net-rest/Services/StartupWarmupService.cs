@@ -6,8 +6,8 @@ public sealed class StartupWarmupService(
     IServiceScopeFactory scopeFactory,
     ILogger<StartupWarmupService> logger) : IHostedService
 {
-    private const string StartedMessage = "Bestand beim Start: {Count} Bücher";
-    private const string StoppedMessage = "Anwendung wird beendet – der In-Memory-Bestand geht verloren.";
+    private const string StartedMessage = "Books in store at startup: {Count}";
+    private const string StoppedMessage = "Application is shutting down - the in-memory store will be lost.";
     private const int FirstPage = 1;
     private const int ProbePageSize = 1;
 

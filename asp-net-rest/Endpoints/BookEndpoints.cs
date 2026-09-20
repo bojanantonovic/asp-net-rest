@@ -12,43 +12,43 @@ public static class BookEndpoints
 
     public static IEndpointRouteBuilder MapBookEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var books = endpoints.MapGroup("/api/books").WithTags("Bücher");
+        var books = endpoints.MapGroup("/api/books").WithTags("Books");
 
         books.MapGet("", GetPage)
             .WithName(nameof(GetPage))
-            .WithSummary("Bücher seitenweise und sortiert lesen")
+            .WithSummary("Read books page by page and sorted")
             .AddEndpointFilter<ValidationEndpointFilter<BookPageQuery>>();
 
         books.MapGet("/{id:int}", GetById)
             .WithName(nameof(GetById))
-            .WithSummary("Ein Buch anhand seiner Id lesen");
+            .WithSummary("Read a single book by its id");
 
         books.MapMethods("/{id:int}", [HttpMethods.Head], HeadById)
             .WithName(nameof(HeadById))
-            .WithSummary("Prüfen, ob ein Buch existiert – ohne Body");
+            .WithSummary("Check whether a book exists - without a body");
 
         books.MapPost("", Create)
             .WithName(nameof(Create))
-            .WithSummary("Ein neues Buch anlegen")
+            .WithSummary("Create a new book")
             .AddEndpointFilter<ValidationEndpointFilter<CreateBookRequest>>();
 
         books.MapPut("/{id:int}", Replace)
             .WithName(nameof(Replace))
-            .WithSummary("Ein Buch vollständig ersetzen")
+            .WithSummary("Replace a book completely")
             .AddEndpointFilter<ValidationEndpointFilter<UpdateBookRequest>>();
 
         books.MapPatch("/{id:int}", Patch)
             .WithName(nameof(Patch))
-            .WithSummary("Einzelne Felder eines Buches ändern")
+            .WithSummary("Change individual fields of a book")
             .AddEndpointFilter<ValidationEndpointFilter<PatchBookRequest>>();
 
         books.MapDelete("/{id:int}", Delete)
             .WithName(nameof(Delete))
-            .WithSummary("Ein Buch löschen");
+            .WithSummary("Delete a book");
 
         books.MapMethods("", [HttpMethods.Options], GetOptions)
             .WithName(nameof(GetOptions))
-            .WithSummary("Die erlaubten HTTP-Methoden erfragen");
+            .WithSummary("Ask for the allowed HTTP methods");
 
         return endpoints;
     }

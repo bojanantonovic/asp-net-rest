@@ -4,8 +4,8 @@ namespace AspNetRest.Middleware;
 
 public sealed class AuditTrailMiddleware(RequestDelegate next, ILogger<AuditTrailMiddleware> logger)
 {
-    private const string StartStep = "Request gestartet: {0} {1}";
-    private const string AuditMessage = "{Method} {Path} -> {StatusCode}; Schritte: {Steps}";
+    private const string StartStep = "Request started: {0} {1}";
+    private const string AuditMessage = "{Method} {Path} -> {StatusCode}; steps: {Steps}";
     private const string StepSeparator = " | ";
 
     public Task InvokeAsync(HttpContext context, IAuditTrail auditTrail)

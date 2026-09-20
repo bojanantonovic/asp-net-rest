@@ -5,10 +5,10 @@ namespace AspNetRest.Persistence;
 public sealed class LoggingBookRepository(IBookRepository inner, ILogger<LoggingBookRepository> logger)
     : IBookRepository
 {
-    private const string AddedMessage = "Buch angelegt: {BookId} – {Title}";
-    private const string ReplacedMessage = "Buch ersetzt: {BookId}";
-    private const string PatchedMessage = "Buch geändert: {BookId}";
-    private const string DeletedMessage = "Buch gelöscht: {BookId} (erfolgreich: {Deleted})";
+    private const string AddedMessage = "Book created: {BookId} - {Title}";
+    private const string ReplacedMessage = "Book replaced: {BookId}";
+    private const string PatchedMessage = "Book patched: {BookId}";
+    private const string DeletedMessage = "Book deleted: {BookId} (succeeded: {Deleted})";
 
     public IReadOnlyList<Book> GetAll() => inner.GetAll();
 

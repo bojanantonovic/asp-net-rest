@@ -1,83 +1,85 @@
-# ASP.NET Core Minimal API – Schulungsbeispiel
+# ASP.NET Core Minimal API – Training Example
 
-Eine vollständige Minimal API zu zwei Themen:
+A complete Minimal API built around two topics:
 
-* **FluentValidation** – Validierungsregeln als lesbare Kette, ausgeführt in einem
-  Endpunkt-Filter, bevor ein Handler überhaupt startet.
-* **Dependency Injection mit MEDI** (`Microsoft.Extensions.DependencyInjection`) –
-  Singleton, Scoped und Transient, keyed services, Options-Pattern, Factory-Registrierung,
-  Dekorator und selbst erzeugte Scopes.
+* **FluentValidation** – validation rules as a readable chain, executed in an endpoint filter
+  before a handler even starts.
+* **Dependency injection with MEDI** (`Microsoft.Extensions.DependencyInjection`) –
+  singleton, scoped and transient, keyed services, the options pattern, factory
+  registration, decorators and manually created scopes.
 
-Zwei Regeln ziehen sich durch das ganze Projekt:
+Two rules run through the whole project:
 
-1. **Keine Lambdas im Routing und in der Konfiguration.** Jeder Endpunkt, jede Factory und
-   jede Regelbedingung ist eine benannte, dokumentierte Methode.
-2. **Jede Methode und jede Lebensdauer ist kommentiert** – am Typ steht, warum er so und
-   nicht anders registriert ist.
+1. **No lambdas in routing and configuration.** Every endpoint, every factory and every rule
+   condition is a named method.
+2. **No comments anywhere** – names, types and structure have to carry the meaning on their
+   own. The code is also fully synchronous.
 
-**Keine Datenbank nötig**: die Daten liegen im Arbeitsspeicher und sind nach jedem Neustart
-wieder im Ausgangszustand.
+**No database required**: the data lives in memory and is back to its initial state after
+every restart.
 
-## Starten
+## Running it
 
 ```bash
 dotnet run --project asp-net-rest
 ```
 
-Die API läuft danach auf <http://localhost:5080>. In Rider: Run-Konfiguration `http`
-starten, oder `asp-net-rest/asp-net-rest.http` öffnen und die Requests einzeln abschicken.
+The API then listens on <http://localhost:5080>. In Rider: start the `http` run
+configuration, or open `asp-net-rest/asp-net-rest.http` and fire the requests one by one.
 
-## Aufbau
+## Layout
 
-| Ordner / Datei | Inhalt |
+| Folder / file | Contents |
 |---|---|
-| `Program.cs` | Die ganze Komposition als eine Kette – mehr nicht |
-| `Composition/ServiceCollectionExtensions.cs` | **Der Composition Root**: alle Registrierungen, nach Lebensdauer gegliedert |
-| `Composition/WebApplicationExtensions.cs` | Middleware-Pipeline und Zuordnung der Endpunkte |
-| `Endpoints/BookEndpoints.cs` | Die Ressource `/api/books` – einmal jede HTTP-Methode |
-| `Endpoints/DiagnosticsEndpoints.cs` | Macht Lebensdauern, Request-Scope und Fehlerbehandlung sichtbar |
-| `Endpoints/HomeEndpoints.cs` | Wegweiser auf `/` |
-| `Validation/` | Validatoren, eigene fluent Regeln, Endpunkt-Filter, Options-Prüfung |
-| `Services/` | Fachliche Dienste – je einer pro Lebensdauer |
-| `Services/Diagnostics/` | Die drei Sonden und der `LifetimeInspector` |
-| `Persistence/` | Repository-Schnittstelle, In-Memory-Speicher, Logging-Dekorator |
-| `Contracts/` | Die JSON-Verträge (Requests, Responses, Query-Parameter) |
-| `Domain/Book.cs` | Das fachliche Modell |
-| `Options/BookLibraryOptions.cs` | Konfigurierbare Grenzwerte aus `appsettings.json` |
-| `asp-net-rest.http` | Fertige Requests zum Ausprobieren |
+| `Program.cs` | The entire composition as a single chain – nothing else |
+| `Composition/ServiceCollectionExtensions.cs` | **The composition root**: every registration, grouped by lifetime |
+| `Composition/WebApplicationExtensions.cs` | Middleware pipeline and endpoint mapping |
+| `Endpoints/BookEndpoints.cs` | The `/api/books` resource – every HTTP method once |
+| `Endpoints/DiagnosticsEndpoints.cs` | Makes lifetimes, request scope and error handling visible |
+| `Endpoints/EndpointResults.cs` | Shared result helpers (`OkOrNotFound`, `NoContentOrNotFound`) |
+| `Endpoints/HomeEndpoints.cs` | Signpost on `/` |
+| `Validation/` | Validators, custom fluent rules, endpoint filter, options validation |
+| `Services/` | Application services – one per lifetime |
+| `Services/Diagnostics/` | The three probes and the `LifetimeInspector` |
+| `Persistence/` | Repository interface, in-memory store, logging decorator |
+| `Contracts/` | The JSON contracts (requests, responses, query parameters) |
+| `Domain/Book.cs` | The domain model |
+| `Options/BookLibraryOptions.cs` | Configurable limits from `appsettings.json` |
+| `asp-net-rest.http` | Ready-made requests to try out |
 
-## Teil 1 – Die Endpunkte
+## Part 1 – The endpoints
 
-| Methode | Pfad | Bedeutung | Status |
+| Method | Path | Meaning | Status |
 |---|---|---|---|
-| `GET` | `/api/books` | Liste lesen (sortiert, seitenweise) | 200, 400 |
-| `GET` | `/api/books/{id}` | ein Buch lesen | 200, 404 |
-| `HEAD` | `/api/books/{id}` | nur prüfen, ob es das Buch gibt | 200, 404 |
-| `POST` | `/api/books` | neues Buch anlegen | 201 + `Location`, 400 |
-| `PUT` | `/api/books/{id}` | Buch vollständig ersetzen | 200, 400, 404 |
-| `PATCH` | `/api/books/{id}` | einzelne Felder ändern | 200, 400, 404 |
-| `DELETE` | `/api/books/{id}` | Buch löschen | 204, 404 |
-| `OPTIONS` | `/api/books` | erlaubte Methoden erfragen | 204 + `Allow` |
+| `GET` | `/api/books` | read the list (sorted, paged) | 200, 400 |
+| `GET` | `/api/books/{id}` | read one book | 200, 404 |
+| `HEAD` | `/api/books/{id}` | only check whether the book exists | 200, 404 |
+| `POST` | `/api/books` | create a new book | 201 + `Location`, 400 |
+| `PUT` | `/api/books/{id}` | replace a book completely | 200, 400, 404 |
+| `PATCH` | `/api/books/{id}` | change individual fields | 200, 400, 404 |
+| `DELETE` | `/api/books/{id}` | delete a book | 204, 404 |
+| `OPTIONS` | `/api/books` | ask for the allowed methods | 204 + `Allow` |
 
-Gemappt wird ausschliesslich über Methodengruppen:
+Mapping happens exclusively through method groups:
 
 ```csharp
 books.MapPost("", Create)
      .WithName(nameof(Create))
-     .WithSummary("Ein neues Buch anlegen")
+     .WithSummary("Create a new book")
      .AddEndpointFilter<ValidationEndpointFilter<CreateBookRequest>>();
 ```
 
-Der Handler dahinter ist eine gewöhnliche Methode mit typisiertem Ergebnis – der Compiler
-lässt nur die dokumentierten Antworten zu:
+The handler behind it is an ordinary method with a typed result – the compiler only allows
+the documented responses:
 
 ```csharp
-private static Results<Ok<BookResponse>, NotFound> GetById(int id, IBookService books)
+private static Results<Ok<BookResponse>, NotFound> GetById(int id, IBookService books) =>
+    OkOrNotFound(books.Get(id));
 ```
 
-## Teil 2 – FluentValidation
+## Part 2 – FluentValidation
 
-Die Regeln stehen im Konstruktor des Validators; jede Bedingung ist eine benannte Methode:
+The rules live in the validator's constructor; every condition is a named method:
 
 ```csharp
 RuleFor(request => request.Title).BookTitle(limits.MaxTitleLength);
@@ -90,100 +92,98 @@ RuleFor(request => request)
     .When(HasTitleAndAuthor);
 ```
 
-Was dabei zu sehen ist:
+What that shows:
 
-* `BookTitle(...)` und `PublicationYear(...)` sind **eigene fluent Regeln**
-  (`Validation/BookRuleExtensions.cs`) – so steht jeder Meldungstext nur einmal im Projekt.
-* `Must(BeUniqueEdition)` zeigt eine **fachliche** Regel mit Datenzugriff: dieselbe Ausgabe darf es nur
-  einmal geben. Möglich ist das, weil Validatoren *scoped* registriert sind.
-* Ausgeführt wird alles im `ValidationEndpointFilter<TRequest>`, einem Endpunkt-Filter. Kein
-  Handler enthält deshalb eine einzige `if (!valid)`-Zeile.
-* Validiert wird nicht nur der Body: `GET /api/books` bündelt seine Query-Parameter mit
-  `[AsParameters]` in `BookPageQuery` und schickt sie durch denselben Filter.
-* Auch die **Konfiguration** wird mit FluentValidation geprüft – beim Start, nicht beim
-  ersten Request (`FluentValidationOptions<TOptions>` + `ValidateOnStart()`).
+* `BookTitle(...)` and `PublicationYear(...)` are **custom fluent rules**
+  (`Validation/BookRuleExtensions.cs`) – every message text exists exactly once in the project.
+* `Must(BeUniqueEdition)` is a **domain** rule with data access: the same edition may only be
+  recorded once. That works because validators are registered *scoped*.
+* Everything runs inside `ValidationEndpointFilter<TRequest>`, an endpoint filter. No handler
+  contains a single `if (!valid)` line.
+* Not only the body is validated: `GET /api/books` bundles its query parameters into
+  `BookPageQuery` with `[AsParameters]` and sends them through the same filter.
+* Even the **configuration** is checked with FluentValidation – at startup, not on the first
+  request (`FluentValidationOptions<TOptions>` + `ValidateOnStart()`).
 
-Fehler kommen einheitlich als Problem Details nach RFC 9457 zurück:
+Errors always come back as problem details per RFC 9457:
 
 ```json
 {
   "title": "One or more validation errors occurred.",
   "status": 400,
   "errors": {
-    "title": ["Der Titel darf nicht leer sein."],
-    "year": ["Das Erscheinungsjahr muss zwischen 1450 und 2027 liegen."]
+    "title": ["The title must not be empty."],
+    "year": ["The publication year must be between 1450 and 2027."]
   }
 }
 ```
 
-## Teil 3 – Dependency Injection (MEDI)
+## Part 3 – Dependency injection (MEDI)
 
-### Die drei Lebensdauern
+### The three lifetimes
 
-| Lebensdauer | Bedeutung | In diesem Projekt |
+| Lifetime | Meaning | In this project |
 |---|---|---|
-| **Singleton** | eine Instanz für die gesamte Laufzeit | `InMemoryBookRepository`, `IClock`, die Sortierstrategien |
-| **Scoped** | eine Instanz pro Scope, in ASP.NET Core pro Request | `IBookService`, `IAuditTrail`, alle Validatoren |
-| **Transient** | bei jeder Anforderung eine neue Instanz | `IBookMapper`, `BookSorterSelector` |
+| **Singleton** | one instance for the whole application lifetime | `InMemoryBookRepository`, `IClock`, the sort strategies |
+| **Scoped** | one instance per scope, in ASP.NET Core per request | `IBookService`, `IAuditTrail`, all validators |
+| **Transient** | a new instance on every resolution | `IBookMapper`, `BookSorterSelector` |
 
-**Die goldene Regel**: Ein Service darf nur Services mit *gleicher oder längerer*
-Lebensdauer im Konstruktor halten. Ein Singleton mit einem Scoped-Feld ist eine
-*captive dependency* – der Container weist sie beim Start ab.
+**The golden rule**: a service may only hold services with an *equal or longer* lifetime in
+its constructor. A singleton with a scoped field is a *captive dependency* – the container
+rejects it at startup.
 
-Wo genau das droht, zeigt das Projekt an drei Stellen samt Lösung:
+The project shows three places where that would happen, each with its solution:
 
-* `AuditTrailMiddleware` – eine Middleware lebt wie ein Singleton; der Scoped-Service kommt
-  deshalb als Parameter von `InvokeAsync`, nicht in den Konstruktor.
-* `ValidationEndpointFilter<T>` – wird einmal beim Start erzeugt; der Validator wird pro
-  Request aus `HttpContext.RequestServices` aufgelöst.
-* `StartupWarmupService` und `FluentValidationOptions<T>` – beide Singletons; sie öffnen
-  sich mit der `IServiceScopeFactory` für die Dauer der Arbeit einen eigenen Scope.
+* `AuditTrailMiddleware` – middleware lives like a singleton, so the scoped service arrives as
+  a parameter of `InvokeAsync` instead of in the constructor.
+* `ValidationEndpointFilter<T>` – created once at startup; the validator is resolved per
+  request from `HttpContext.RequestServices`.
+* `StartupWarmupService` and `FluentValidationOptions<T>` – both singletons; they open their
+  own scope with `IServiceScopeFactory` for the duration of the work.
 
-### Zum Anfassen
+### See it for yourself
 
 ```bash
 curl http://localhost:5080/api/diagnostics/lifetimes
 ```
 
-Zweimal aufrufen und die Ids vergleichen:
+Call it twice and compare the ids:
 
-* die **Singleton**-Id bleibt über alle Requests dieselbe,
-* die **Scoped**-Id ist innerhalb eines Requests stabil und ändert sich mit jedem neuen
-  Request – und auch im selbst erzeugten Kind-Scope,
-* die beiden **Transient**-Ids unterscheiden sich schon innerhalb desselben Scopes.
+* the **singleton** id stays the same across all requests,
+* the **scoped** id is stable within one request and changes with every new request – and in
+  the manually created child scope as well,
+* the two **transient** ids already differ within the same scope.
 
 ```bash
 curl http://localhost:5080/api/diagnostics/audit
 ```
 
-Der erste Protokolleintrag stammt aus der Middleware, gelesen wird er im Endpunkt – der
-Beweis, dass beide dieselbe Scoped-Instanz benutzen.
+The first audit entry comes from the middleware and is read in the endpoint – proof that both
+use the same scoped instance.
 
-### Weitere Registrierungsarten
+### More registration styles
 
-* **Keyed services** – drei Sortierstrategien teilen sich `IBookSorter` und werden über die
-  Schlüssel `id`, `title`, `year` unterschieden (`?sortBy=title`).
-* **Factory-Registrierung + Dekorator** – `IBookRepository` wird über eine Methode
-  aufgelöst, die den echten Speicher in `LoggingBookRepository` wickelt. Die Aufrufer
-  merken davon nichts.
-* **Options-Pattern** – `BookLibraryOptions` kommt aus `appsettings.json`, wird beim Start
-  validiert und über `IOptions<T>` injiziert.
-* **Hosted Service** – `StartupWarmupService` zählt beim Start den Bestand und zeigt dabei,
-  wie ein Singleton an einen Scoped-Service kommt.
+* **Keyed services** – three sort strategies share `IBookSorter` and are told apart by the
+  keys `id`, `title`, `year` (`?sortBy=title`).
+* **Factory registration + decorator** – `IBookRepository` is resolved through a method that
+  wraps the real store in `LoggingBookRepository`. Callers never notice.
+* **Options pattern** – `BookLibraryOptions` comes from `appsettings.json`, is validated at
+  startup and injected via `IOptions<T>`.
+* **Hosted service** – `StartupWarmupService` counts the books at startup and shows how a
+  singleton reaches a scoped service.
 
-## Fehlerbehandlung
+## Error handling
 
-`GlobalExceptionHandler` (ein `IExceptionHandler`) macht aus jeder unbehandelten Ausnahme
-eine 500er-Antwort im Problem-Details-Format; die technische Meldung bleibt im Log.
-Ausprobieren:
+`GlobalExceptionHandler` (an `IExceptionHandler`) turns every unhandled exception into a 500
+response in problem details format; the technical message stays in the log. Try it:
 
 ```bash
 curl -i http://localhost:5080/api/diagnostics/boom
 ```
 
-## Fluent, wo es geht
+## Fluent wherever possible
 
-Die Komposition der Anwendung ist eine einzige Kette:
+The composition of the application is a single chain:
 
 ```csharp
 WebApplication.CreateBuilder(args)
@@ -194,14 +194,14 @@ WebApplication.CreateBuilder(args)
     .Run();
 ```
 
-Dasselbe Prinzip zieht sich durch: Registrierungen (`services.AddConfiguredOptions(configuration)
-.AddPersistence().AddDomainServices()…`, jede Gruppe intern ebenfalls verkettet), die Pipeline
-(`app.UseExceptionHandler().UseStatusCodePages().UseMiddleware<AuditTrailMiddleware>()`), die
-Endpunkt-Gruppen (`MapHomeEndpoints().MapBookEndpoints().MapDiagnosticsEndpoints()`), der Seed des
-Speichers (`Seed(…).Seed(…).Seed(…)`) und `IAuditTrail.Record`, das sich selbst zurückgibt.
+The same principle runs through the rest: registrations (`services.AddConfiguredOptions(configuration)
+.AddPersistence().AddDomainServices()…`, each group chained internally as well), the pipeline
+(`app.UseExceptionHandler().UseStatusCodePages().UseMiddleware<AuditTrailMiddleware>()`), the
+endpoint groups (`MapHomeEndpoints().MapBookEndpoints().MapDiagnosticsEndpoints()`), the store's
+seed (`Seed(…).Seed(…).Seed(…)`) and `IAuditTrail.Record`, which returns itself.
 
-In den Tests gilt es genauso – Testdaten kommen aus unveränderlichen Buildern, geprüft wird mit
-[AwesomeAssertions](https://github.com/AwesomeAssertions/AwesomeAssertions) (MIT-Fork von
+The tests follow suit – test data comes from immutable builders, assertions use
+[AwesomeAssertions](https://github.com/AwesomeAssertions/AwesomeAssertions) (MIT fork of
 FluentAssertions 7):
 
 ```csharp
@@ -214,32 +214,28 @@ result.Errors.Should()
     .Which.ErrorMessage.Should().Be(ValidationMessages.TitleRequired);
 ```
 
-## Synchron und ohne Kommentare
+## Synchronous and comment-free
 
-Der Code ist durchgehend synchron: kein `async`, kein `await`, keine `Task`-Rückgabewerte in
-eigenen Signaturen. Handler, Services und Repository geben ihre Werte direkt zurück:
+The code is synchronous throughout: no `async`, no `await`, no `Task` return values in our own
+signatures. Handlers, services and repository return their values directly:
 
 ```csharp
-private static Results<Ok<BookResponse>, NotFound> GetById(int id, IBookService books)
-{
-    var book = books.Get(id);
-
-    return book is null ? TypedResults.NotFound() : TypedResults.Ok(book);
-}
+private static Results<Ok, NotFound> HeadById(int id, IBookService books) =>
+    OkOrNotFound(books.Exists(id));
 ```
 
-Vier Stellen geben weiterhin `Task` bzw. `ValueTask` zurück, weil die Schnittstellen von
-ASP.NET Core es vorschreiben – aber keine davon benutzt `async`/`await`:
-`IExceptionHandler.TryHandleAsync`, `IEndpointFilter.InvokeAsync`, `IHostedService`
-und die Middleware. Die `AuditTrailMiddleware` protokolliert deshalb über
-`Response.OnCompleted(...)` statt über `await next(context)`.
+Four places still return `Task` or `ValueTask` because the ASP.NET Core interfaces demand it –
+but none of them uses `async`/`await`: `IExceptionHandler.TryHandleAsync`,
+`IEndpointFilter.InvokeAsync`, `IHostedService` and the middleware. That is why
+`AuditTrailMiddleware` logs through `Response.OnCompleted(...)` instead of
+`await next(context)`.
 
-Ausnahme sind die Integrationstests: der In-Memory-Testserver von ASP.NET Core weist den
-synchronen Aufruf ausdrücklich ab (`NotSupportedException`), dort bleibt der `HttpClient`
-asynchron.
+The integration tests are the exception: the in-memory test server of ASP.NET Core explicitly
+rejects the synchronous call (`NotSupportedException`), so the `HttpClient` stays asynchronous
+there.
 
-Der Code enthält keine Kommentare – auch die Tests nicht. Die Dreiteilung Given-When-Then
-steht dort im Methodennamen und in den durch Leerzeilen getrennten Blöcken.
+The code contains no comments – the tests included. Given-When-Then shows up in the method
+name and in the blocks separated by blank lines.
 
 ## Tests
 
@@ -247,35 +243,36 @@ steht dort im Methodennamen und in den durch Leerzeilen getrennten Blöcken.
 dotnet test
 ```
 
-70 Tests in `asp-net-rest.Tests`, benannt nach `given<Vorbedingung>_when<Aktion>_then<Ergebnis>`
-und in drei durch Leerzeilen getrennte Blöcke gegliedert:
+70 tests in `asp-net-rest.Tests`, named `given<Precondition>_when<Action>_then<Outcome>` and
+split into three blocks separated by blank lines:
 
-| Ordner | Was geprüft wird |
+| Folder | What it covers |
 |---|---|
-| `Validation/` | Die Regeln einzeln: Pflichtfelder, Längen, Jahresgrenzen, Dubletten, PATCH ohne Änderung, unbekannte Sortierschlüssel |
-| `Services/` | Sortierstrategien, `BookService` (Paging, Trimmen, PATCH-Semantik) und die Registrierung selbst: Lebensdauern, keyed services, Dekorator, Options |
-| `Persistence/` | Der Speicher: Id-Vergabe, PATCH lässt andere Felder stehen, Dublettenprüfung ohne Beachtung der Gross-/Kleinschreibung |
-| `Api/` | Integrationstests über die ganze Anwendung – jede HTTP-Methode, Status-Codes, `Location`- und `Allow`-Header, Problem Details |
-| `Fixtures/` | Fluent Builder für Testdaten (`ABook()`, `APatch()`), Konstanten (`BookFixtures`), die angehaltene Uhr (`FixedClock`) und der Container ohne Webserver (`TestHost`) |
+| `Validation/` | The rules one by one: required fields, lengths, year bounds, duplicates, PATCH without a change, unknown sort keys |
+| `Services/` | Sort strategies, `BookService` (paging, trimming, PATCH semantics) and the registration itself: lifetimes, keyed services, decorator, options |
+| `Persistence/` | The store: id assignment, PATCH leaving other fields alone, case-insensitive duplicate detection |
+| `Api/` | Integration tests across the whole application – every HTTP method, status codes, `Location` and `Allow` headers, problem details |
+| `Fixtures/` | Fluent builders for test data (`ABook()`, `APatch()`), constants (`BookFixtures`), the frozen clock (`FixedClock`) and the container without a web server (`TestHost`) |
 
-Zwei Dinge sind dabei die eigentliche Lehre:
+Three things are the actual lesson here:
 
-* **Fluent Assertions**: `page.Should().BeEquivalentTo(new { TotalCount = 3, SortedBy = "id" })`
-  prüft mehrere Felder in einer Zusicherung – und meldet im Fehlerfall, welches Feld abweicht.
-* **Unit-Tests ohne Webserver**: Validatoren und Services entstehen mit einem `new` bzw. aus
-  einem Container ohne Host. Möglich ist das nur, weil die Abhängigkeiten an Schnittstellen
-  hängen – `FixedClock` hält die Zeit an, sonst wäre die Jahresregel nur bis Silvester grün.
-* **Integrationstests mit `WebApplicationFactory<Program>`**: dieselbe `Program.cs`, im
-  Arbeitsspeicher gestartet, ohne Port und ohne Netzwerk. Jeder Test bekommt eine eigene
-  Anwendung und damit einen frischen Bestand.
+* **Fluent assertions**: `page.Should().BeEquivalentTo(new { TotalCount = 3, SortedBy = "id" })`
+  checks several fields in one assertion – and reports which field differs when it fails.
+* **Unit tests without a web server**: validators and services are created with a `new` or from
+  a container without a host. That only works because the dependencies hang off interfaces –
+  `FixedClock` freezes time, otherwise the year rule would only be green until New Year's Eve.
+* **Integration tests with `WebApplicationFactory<Program>`**: the same `Program.cs`, started in
+  memory, without a port and without networking. Every test gets its own application and
+  therefore a fresh store.
 
-Für die Tests trägt `Program.cs` am Ende eine Zeile `public partial class Program;` – bei
-Top-Level-Statements ist die erzeugte Klasse sonst intern. Und `AddApplicationServices` ist
-in `AddApplicationCoreServices` (alles ohne Webserver) und `AddWebInfrastructure`
-(OpenAPI, Problem Details) geteilt, damit der Container im Unit-Test ohne Host baubar bleibt.
+For the tests, `Program.cs` carries a final line `public partial class Program;` – with
+top-level statements the generated class would otherwise be internal. And
+`AddApplicationServices` is split into `AddApplicationCoreServices` (everything that works
+without a web server) and `AddWebInfrastructure` (OpenAPI, problem details) so the container
+stays buildable in a unit test without a host.
 
-## Nächster Schritt
+## Next step
 
-Soll aus dem RAM eine echte Datenbank werden, wird nur `InMemoryBookRepository` gegen ein
-Repository mit EF Core ausgetauscht – eine Zeile im Composition Root. Endpunkte, Validatoren
-und Services bleiben unverändert. Genau dafür gibt es die Schnittstellen.
+To turn the in-memory store into a real database, only `InMemoryBookRepository` is swapped for
+a repository backed by EF Core – one line in the composition root. Endpoints, validators and
+services stay untouched. That is exactly what the interfaces are for.

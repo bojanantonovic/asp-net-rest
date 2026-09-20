@@ -14,14 +14,14 @@ public sealed class BookService(
     IOptions<BookLibraryOptions> options) : IBookService
 {
     private const int FirstPage = 1;
-    private const string ListedStep = "Liste gelesen: Seite {0}, Sortierung {1}";
-    private const string ReadStep = "Buch {0} gelesen (gefunden: {1})";
-    private const string CreatedStep = "Buch {0} angelegt";
-    private const string ReplacedStep = "Buch {0} ersetzt (gefunden: {1})";
-    private const string PatchedStep = "Buch {0} geändert (gefunden: {1})";
-    private const string DeletedStep = "Buch {0} gelöscht (erfolgreich: {1})";
-    private const string Yes = "ja";
-    private const string No = "nein";
+    private const string ListedStep = "Listed page {0} sorted by {1}";
+    private const string ReadStep = "Read book {0} (found: {1})";
+    private const string CreatedStep = "Created book {0}";
+    private const string ReplacedStep = "Replaced book {0} (found: {1})";
+    private const string PatchedStep = "Patched book {0} (found: {1})";
+    private const string DeletedStep = "Deleted book {0} (succeeded: {1})";
+    private const string Yes = "yes";
+    private const string No = "no";
 
     private readonly BookLibraryOptions _options = options.Value;
 

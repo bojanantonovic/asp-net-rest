@@ -6,9 +6,9 @@ public sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    private const string LogMessage = "Unbehandelte Ausnahme bei {Method} {Path}";
-    private const string ProblemTitle = "Unerwarteter Fehler";
-    private const string ProblemDetail = "Die Anfrage konnte nicht verarbeitet werden.";
+    private const string LogMessage = "Unhandled exception during {Method} {Path}";
+    private const string ProblemTitle = "Unexpected error";
+    private const string ProblemDetail = "The request could not be processed.";
 
     public ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
