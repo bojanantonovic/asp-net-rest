@@ -1,0 +1,103 @@
+### Alle Requests dieser Schulung – in Rider/VS Code mit dem grünen Pfeil links ausführbar.
+@host = http://localhost:5080
+
+### ----- Übersicht -----
+GET {{host}}/
+
+### Das generierte OpenAPI-Dokument (nur in der Entwicklung)
+GET {{host}}/openapi/v1.json
+
+### ----- CRUD auf /api/books -----
+### READ (Liste): Standard-Sortierung nach Id
+GET {{host}}/api/books
+
+### READ (Liste): sortiert nach Titel – wählt den keyed service "title"
+GET {{host}}/api/books?sortBy=title
+
+### READ (Liste): sortiert nach Jahr, zwei Einträge pro Seite
+GET {{host}}/api/books?sortBy=year&page=1&pageSize=2
+
+### READ (Liste): ungültige Query-Parameter -> 400 vom Validierungs-Filter
+GET {{host}}/api/books?sortBy=verlag&page=0&pageSize=9999
+
+### READ (einzeln)
+GET {{host}}/api/books/1
+
+### READ: unbekannte Id -> 404
+GET {{host}}/api/books/999
+
+### HEAD: prüft nur die Existenz, ohne Body
+HEAD {{host}}/api/books/1
+
+### CREATE -> 201 mit Location-Header
+POST {{host}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Der Richter und sein Henker",
+  "author": "Friedrich Dürrenmatt",
+  "year": 1950
+}
+
+### CREATE: Dublette -> 400 (fachliche Regel mit Datenbank-Zugriff)
+POST {{host}}/api/books
+Content-Type: application/json
+
+{
+  "title": "der richter und sein henker",
+  "author": "Friedrich Dürrenmatt",
+  "year": 1950
+}
+
+### CREATE: ungültige Daten -> 400 mit Problem Details
+POST {{host}}/api/books
+Content-Type: application/json
+
+{
+  "title": "",
+  "author": "",
+  "year": 1000
+}
+
+### UPDATE (vollständig)
+PUT {{host}}/api/books/4
+Content-Type: application/json
+
+{
+  "title": "Der Verdacht",
+  "author": "Friedrich Dürrenmatt",
+  "year": 1951
+}
+
+### UPDATE (nur ein Feld)
+PATCH {{host}}/api/books/4
+Content-Type: application/json
+
+{
+  "year": 1952
+}
+
+### PATCH ohne Änderung -> 400
+PATCH {{host}}/api/books/4
+Content-Type: application/json
+
+{}
+
+### DELETE -> 204
+DELETE {{host}}/api/books/4
+
+### DELETE derselben Id nochmals -> 404
+DELETE {{host}}/api/books/4
+
+### OPTIONS: erlaubte Methoden im Allow-Header
+OPTIONS {{host}}/api/books
+
+### ----- Diagnose: Dependency Injection zum Anfassen -----
+### Lebensdauern vergleichen – zweimal aufrufen und die Ids vergleichen!
+GET {{host}}/api/diagnostics/lifetimes
+
+### Das Protokoll des laufenden Requests (Scoped-Service über Middleware und Endpunkt hinweg)
+GET {{host}}/api/diagnostics/audit
+
+### Absichtlicher Fehler -> 500 als Problem Details
+GET {{host}}/api/diagnostics/boom

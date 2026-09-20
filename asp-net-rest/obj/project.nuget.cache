@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "PNUm44Rkn0E=",
+  "success": true,
+  "projectFilePath": "/Users/bojanantonovic/RiderProjects/asp-net-rest/asp-net-rest/asp-net-rest.csproj",
+  "expectedPackageFiles": [
+    "/Users/bojanantonovic/.nuget/packages/fluentvalidation/12.1.1/fluentvalidation.12.1.1.nupkg.sha512",
+    "/Users/bojanantonovic/.nuget/packages/fluentvalidation.dependencyinjectionextensions/12.1.1/fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
+    "/Users/bojanantonovic/.nuget/packages/microsoft.aspnetcore.openapi/10.0.11/microsoft.aspnetcore.openapi.10.0.11.nupkg.sha512",
+    "/Users/bojanantonovic/.nuget/packages/microsoft.openapi/2.7.5/microsoft.openapi.2.7.5.nupkg.sha512"
+  ],
+  "logs": []
+}
