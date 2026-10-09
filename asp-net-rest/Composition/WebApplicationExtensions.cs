@@ -5,26 +5,29 @@ namespace AspNetRest.Composition;
 
 public static class WebApplicationExtensions
 {
-    public static WebApplication UseApplicationPipeline(this WebApplication app)
+    extension(WebApplication app)
     {
-        app.UseExceptionHandler()
-            .UseStatusCodePages()
-            .UseMiddleware<AuditTrailMiddleware>();
-
-        return app;
-    }
-
-    public static WebApplication MapApplicationEndpoints(this WebApplication app)
-    {
-        if (app.Environment.IsDevelopment())
+        public WebApplication UseApplicationPipeline()
         {
-            app.MapOpenApi();
+            app.UseExceptionHandler()
+                .UseStatusCodePages()
+                .UseMiddleware<AuditTrailMiddleware>();
+
+            return app;
         }
 
-        app.MapHomeEndpoints()
-            .MapBookEndpoints()
-            .MapDiagnosticsEndpoints();
+        public WebApplication MapApplicationEndpoints()
+        {
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+            }
 
-        return app;
+            app.MapHomeEndpoints()
+                .MapBookEndpoints()
+                .MapDiagnosticsEndpoints();
+
+            return app;
+        }
     }
 }

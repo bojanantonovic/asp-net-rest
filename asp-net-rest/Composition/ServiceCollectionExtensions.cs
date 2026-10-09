@@ -13,76 +13,84 @@ namespace AspNetRest.Composition;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
+    extension(WebApplicationBuilder builder)
     {
-        builder.Services
-            .AddApplicationCoreServices(builder.Configuration)
-            .AddWebInfrastructure();
+        public WebApplicationBuilder AddApplicationServices()
+        {
+            builder.Services
+                .AddApplicationCoreServices(builder.Configuration)
+                .AddWebInfrastructure();
 
-        return builder;
+            return builder;
+        }
     }
 
-    public static IServiceCollection AddApplicationCoreServices(
-        this IServiceCollection services,
-        IConfiguration configuration) =>
-        services
-            .AddConfiguredOptions(configuration)
-            .AddPersistence()
-            .AddDomainServices()
-            .AddSortingStrategies()
-            .AddLifetimeProbes()
-            .AddFluentValidation();
-
-    private static IServiceCollection AddConfiguredOptions(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        services.AddOptions<BookLibraryOptions>()
-            .Bind(configuration.GetSection(BookLibraryOptions.SectionName))
-            .ValidateOnStart();
+        public IServiceCollection AddApplicationCoreServices(IConfiguration configuration) =>
+            services
+                .AddConfiguredOptions(configuration)
+                .AddPersistence()
+                .AddDomainServices()
+                .AddSortingStrategies()
+                .AddLifetimeProbes()
+                .AddFluentValidation();
 
-        return services
-            .AddSingleton<IValidateOptions<BookLibraryOptions>, FluentValidationOptions<BookLibraryOptions>>();
+        private IServiceCollection AddConfiguredOptions(IConfiguration configuration)
+        {
+            services.AddOptions<BookLibraryOptions>()
+                .Bind(configuration.GetSection(BookLibraryOptions.SectionName))
+                .ValidateOnStart();
+
+            return services
+                .AddSingleton<IValidateOptions<BookLibraryOptions>, FluentValidationOptions<BookLibraryOptions>>();
+        }
+
+        private IServiceCollection AddPersistence() =>
+            services
+                .AddSingleton<InMemoryBookRepository>()
+                .AddSingleton<IBookRepository>(CreateLoggingRepository);
+
+        private IServiceCollection AddDomainServices() =>
+            services
+                .AddSingleton<IClock, SystemClock>()
+                .AddScoped<IAuditTrail, AuditTrail>()
+                .AddScoped<IBookService, BookService>()
+                .AddScoped<LifetimeInspector>()
+                .AddTransient<IBookMapper, BookMapper>()
+                .AddTransient<BookSorterSelector>()
+                .AddHostedService<StartupWarmupService>();
+
+        private IServiceCollection AddSortingStrategies() =>
+            services
+                .AddKeyedSingleton<IBookSorter, SortBooksById>(SortKeys.ById)
+                .AddKeyedSingleton<IBookSorter, SortBooksByTitle>(SortKeys.ByTitle)
+                .AddKeyedSingleton<IBookSorter, SortBooksByYear>(SortKeys.ByYear);
+
+        private IServiceCollection AddLifetimeProbes() =>
+            services
+                .AddSingleton<ISingletonProbe, SingletonProbe>()
+                .AddScoped<IScopedProbe, ScopedProbe>()
+                .AddTransient<ITransientProbe, TransientProbe>();
+
+        private IServiceCollection AddFluentValidation()
+        {
+            ValidatorOptions.Global.PropertyNameResolver = ResolveCamelCasePropertyName;
+
+            return services.AddValidatorsFromAssemblyContaining<CreateBookRequestValidator>(ServiceLifetime.Scoped);
+        }
+
+        private IServiceCollection AddWebInfrastructure() =>
+            services
+                .AddProblemDetails()
+                .AddExceptionHandler<GlobalExceptionHandler>()
+                .AddOpenApi();
     }
-
-    private static IServiceCollection AddPersistence(this IServiceCollection services) =>
-        services
-            .AddSingleton<InMemoryBookRepository>()
-            .AddSingleton<IBookRepository>(CreateLoggingRepository);
 
     private static IBookRepository CreateLoggingRepository(IServiceProvider services) =>
         new LoggingBookRepository(
             services.GetRequiredService<InMemoryBookRepository>(),
             services.GetRequiredService<ILogger<LoggingBookRepository>>());
-
-    private static IServiceCollection AddDomainServices(this IServiceCollection services) =>
-        services
-            .AddSingleton<IClock, SystemClock>()
-            .AddScoped<IAuditTrail, AuditTrail>()
-            .AddScoped<IBookService, BookService>()
-            .AddScoped<LifetimeInspector>()
-            .AddTransient<IBookMapper, BookMapper>()
-            .AddTransient<BookSorterSelector>()
-            .AddHostedService<StartupWarmupService>();
-
-    private static IServiceCollection AddSortingStrategies(this IServiceCollection services) =>
-        services
-            .AddKeyedSingleton<IBookSorter, SortBooksById>(SortKeys.ById)
-            .AddKeyedSingleton<IBookSorter, SortBooksByTitle>(SortKeys.ByTitle)
-            .AddKeyedSingleton<IBookSorter, SortBooksByYear>(SortKeys.ByYear);
-
-    private static IServiceCollection AddLifetimeProbes(this IServiceCollection services) =>
-        services
-            .AddSingleton<ISingletonProbe, SingletonProbe>()
-            .AddScoped<IScopedProbe, ScopedProbe>()
-            .AddTransient<ITransientProbe, TransientProbe>();
-
-    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
-    {
-        ValidatorOptions.Global.PropertyNameResolver = ResolveCamelCasePropertyName;
-
-        return services.AddValidatorsFromAssemblyContaining<CreateBookRequestValidator>(ServiceLifetime.Scoped);
-    }
 
     private static string ResolveCamelCasePropertyName(
         Type? type,
@@ -95,10 +103,4 @@ public static class ServiceCollectionExtensions
             ? string.Empty
             : char.ToLowerInvariant(name[0]) + name[1..];
     }
-
-    private static IServiceCollection AddWebInfrastructure(this IServiceCollection services) =>
-        services
-            .AddProblemDetails()
-            .AddExceptionHandler<GlobalExceptionHandler>()
-            .AddOpenApi();
 }

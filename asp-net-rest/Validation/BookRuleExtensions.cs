@@ -4,31 +4,30 @@ namespace AspNetRest.Validation;
 
 public static class BookRuleExtensions
 {
-    public static IRuleBuilderOptions<T, string> BookTitle<T>(
-        this IRuleBuilder<T, string> ruleBuilder,
-        int maxLength) =>
-        ruleBuilder
-            .NotEmpty().WithMessage(ValidationMessages.TitleRequired)
-            .MaximumLength(maxLength).WithMessage(ValidationMessages.TitleTooLong);
+    extension<T>(IRuleBuilder<T, string> ruleBuilder)
+    {
+        public IRuleBuilderOptions<T, string> BookTitle(int maxLength) =>
+            ruleBuilder
+                .NotEmpty().WithMessage(ValidationMessages.TitleRequired)
+                .MaximumLength(maxLength).WithMessage(ValidationMessages.TitleTooLong);
 
-    public static IRuleBuilderOptions<T, string> AuthorName<T>(
-        this IRuleBuilder<T, string> ruleBuilder,
-        int maxLength) =>
-        ruleBuilder
-            .NotEmpty().WithMessage(ValidationMessages.AuthorRequired)
-            .MaximumLength(maxLength).WithMessage(ValidationMessages.AuthorTooLong);
+        public IRuleBuilderOptions<T, string> AuthorName(int maxLength) =>
+            ruleBuilder
+                .NotEmpty().WithMessage(ValidationMessages.AuthorRequired)
+                .MaximumLength(maxLength).WithMessage(ValidationMessages.AuthorTooLong);
+    }
 
-    public static IRuleBuilderOptions<T, int> PublicationYear<T>(
-        this IRuleBuilder<T, int> ruleBuilder,
-        int earliestYear,
-        int latestYear) =>
-        ruleBuilder
-            .InclusiveBetween(earliestYear, latestYear).WithMessage(ValidationMessages.YearOutOfRange);
+    extension<T>(IRuleBuilder<T, int> ruleBuilder)
+    {
+        public IRuleBuilderOptions<T, int> PublicationYear(int earliestYear, int latestYear) =>
+            ruleBuilder
+                .InclusiveBetween(earliestYear, latestYear).WithMessage(ValidationMessages.YearOutOfRange);
+    }
 
-    public static IRuleBuilderOptions<T, int?> PublicationYear<T>(
-        this IRuleBuilder<T, int?> ruleBuilder,
-        int earliestYear,
-        int latestYear) =>
-        ruleBuilder
-            .InclusiveBetween(earliestYear, latestYear).WithMessage(ValidationMessages.YearOutOfRange);
+    extension<T>(IRuleBuilder<T, int?> ruleBuilder)
+    {
+        public IRuleBuilderOptions<T, int?> PublicationYear(int earliestYear, int latestYear) =>
+            ruleBuilder
+                .InclusiveBetween(earliestYear, latestYear).WithMessage(ValidationMessages.YearOutOfRange);
+    }
 }

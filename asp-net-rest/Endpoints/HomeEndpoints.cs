@@ -7,14 +7,17 @@ public static class HomeEndpoints
 {
     private const string ApiName = "ASP.NET Core Minimal API – FluentValidation & Dependency Injection";
 
-    public static IEndpointRouteBuilder MapHomeEndpoints(this IEndpointRouteBuilder endpoints)
+    extension(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/", GetOverview)
-            .WithName(nameof(GetOverview))
-            .WithSummary("Overview of the available endpoints")
-            .WithTags("Home");
+        public IEndpointRouteBuilder MapHomeEndpoints()
+        {
+            endpoints.MapGet("/", GetOverview)
+                .WithName(nameof(GetOverview))
+                .WithSummary("Overview of the available endpoints")
+                .WithTags("Home");
 
-        return endpoints;
+            return endpoints;
+        }
     }
 
     private static Ok<ApiOverview> GetOverview(IWebHostEnvironment environment) =>

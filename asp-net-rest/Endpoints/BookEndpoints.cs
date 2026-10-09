@@ -10,47 +10,50 @@ public static class BookEndpoints
 {
     private const string AllowedMethods = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
 
-    public static IEndpointRouteBuilder MapBookEndpoints(this IEndpointRouteBuilder endpoints)
+    extension(IEndpointRouteBuilder endpoints)
     {
-        var books = endpoints.MapGroup("/api/books").WithTags("Books");
+        public IEndpointRouteBuilder MapBookEndpoints()
+        {
+            var books = endpoints.MapGroup("/api/books").WithTags("Books");
 
-        books.MapGet("", GetPage)
-            .WithName(nameof(GetPage))
-            .WithSummary("Read books page by page and sorted")
-            .AddEndpointFilter<ValidationEndpointFilter<BookPageQuery>>();
+            books.MapGet("", GetPage)
+                .WithName(nameof(GetPage))
+                .WithSummary("Read books page by page and sorted")
+                .AddEndpointFilter<ValidationEndpointFilter<BookPageQuery>>();
 
-        books.MapGet("/{id:int}", GetById)
-            .WithName(nameof(GetById))
-            .WithSummary("Read a single book by its id");
+            books.MapGet("/{id:int}", GetById)
+                .WithName(nameof(GetById))
+                .WithSummary("Read a single book by its id");
 
-        books.MapMethods("/{id:int}", [HttpMethods.Head], HeadById)
-            .WithName(nameof(HeadById))
-            .WithSummary("Check whether a book exists - without a body");
+            books.MapMethods("/{id:int}", [HttpMethods.Head], HeadById)
+                .WithName(nameof(HeadById))
+                .WithSummary("Check whether a book exists - without a body");
 
-        books.MapPost("", Create)
-            .WithName(nameof(Create))
-            .WithSummary("Create a new book")
-            .AddEndpointFilter<ValidationEndpointFilter<CreateBookRequest>>();
+            books.MapPost("", Create)
+                .WithName(nameof(Create))
+                .WithSummary("Create a new book")
+                .AddEndpointFilter<ValidationEndpointFilter<CreateBookRequest>>();
 
-        books.MapPut("/{id:int}", Replace)
-            .WithName(nameof(Replace))
-            .WithSummary("Replace a book completely")
-            .AddEndpointFilter<ValidationEndpointFilter<UpdateBookRequest>>();
+            books.MapPut("/{id:int}", Replace)
+                .WithName(nameof(Replace))
+                .WithSummary("Replace a book completely")
+                .AddEndpointFilter<ValidationEndpointFilter<UpdateBookRequest>>();
 
-        books.MapPatch("/{id:int}", Patch)
-            .WithName(nameof(Patch))
-            .WithSummary("Change individual fields of a book")
-            .AddEndpointFilter<ValidationEndpointFilter<PatchBookRequest>>();
+            books.MapPatch("/{id:int}", Patch)
+                .WithName(nameof(Patch))
+                .WithSummary("Change individual fields of a book")
+                .AddEndpointFilter<ValidationEndpointFilter<PatchBookRequest>>();
 
-        books.MapDelete("/{id:int}", Delete)
-            .WithName(nameof(Delete))
-            .WithSummary("Delete a book");
+            books.MapDelete("/{id:int}", Delete)
+                .WithName(nameof(Delete))
+                .WithSummary("Delete a book");
 
-        books.MapMethods("", [HttpMethods.Options], GetOptions)
-            .WithName(nameof(GetOptions))
-            .WithSummary("Ask for the allowed HTTP methods");
+            books.MapMethods("", [HttpMethods.Options], GetOptions)
+                .WithName(nameof(GetOptions))
+                .WithSummary("Ask for the allowed HTTP methods");
 
-        return endpoints;
+            return endpoints;
+        }
     }
 
     private static Ok<BookPageResponse> GetPage([AsParameters] BookPageQuery query, IBookService books) =>

@@ -7,23 +7,26 @@ namespace AspNetRest.Endpoints;
 
 public static class DiagnosticsEndpoints
 {
-    public static IEndpointRouteBuilder MapDiagnosticsEndpoints(this IEndpointRouteBuilder endpoints)
+    extension(IEndpointRouteBuilder endpoints)
     {
-        var diagnostics = endpoints.MapGroup("/api/diagnostics").WithTags("Diagnostics");
+        public IEndpointRouteBuilder MapDiagnosticsEndpoints()
+        {
+            var diagnostics = endpoints.MapGroup("/api/diagnostics").WithTags("Diagnostics");
 
-        diagnostics.MapGet("/lifetimes", GetLifetimes)
-            .WithName(nameof(GetLifetimes))
-            .WithSummary("Compare the three lifetimes across two scopes");
+            diagnostics.MapGet("/lifetimes", GetLifetimes)
+                .WithName(nameof(GetLifetimes))
+                .WithSummary("Compare the three lifetimes across two scopes");
 
-        diagnostics.MapGet("/audit", GetAuditTrail)
-            .WithName(nameof(GetAuditTrail))
-            .WithSummary("Read the audit trail of the current request");
+            diagnostics.MapGet("/audit", GetAuditTrail)
+                .WithName(nameof(GetAuditTrail))
+                .WithSummary("Read the audit trail of the current request");
 
-        diagnostics.MapGet("/boom", Boom)
-            .WithName(nameof(Boom))
-            .WithSummary("Throw an unhandled exception (results in 500)");
+            diagnostics.MapGet("/boom", Boom)
+                .WithName(nameof(Boom))
+                .WithSummary("Throw an unhandled exception (results in 500)");
 
-        return endpoints;
+            return endpoints;
+        }
     }
 
     private static Ok<LifetimeReport> GetLifetimes(LifetimeInspector inspector) =>
